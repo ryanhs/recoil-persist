@@ -31,18 +31,24 @@ function recoilPersist(paths = [], config = {}) {
       storage.setItem(key, JSON.stringify(toStore))
     } catch (e) {}
   }
-
+  
+  let updated = false;
+  
   function updateState({ set }) {
     const toParse = storage.getItem(key)
     let state
     try {
       state = JSON.parse(toParse)
     } catch (e) {
+      updated = true;
       return
     }
+    
     if (state === null) {
+      updated = true;
       return
     }
+    
     Object.keys(state).forEach((key) => {
       if (paths.length === 0 || paths.includes(key)) {
         try {
@@ -50,9 +56,11 @@ function recoilPersist(paths = [], config = {}) {
         } catch (e) {}
       }
     })
+    
+    updated = true;
   }
 
-  return { RecoilPersist, updateState }
+  return { RecoilPersist, updateState, isUpdated: () => updated }
 }
 
 module.exports = recoilPersist
