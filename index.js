@@ -32,7 +32,7 @@ function recoilPersist(paths = [], config = {}) {
     } catch (e) {}
   }
   
-  let updated = false;
+  let updatedCallback = () => null;
   
   function updateState({ set }) {
     const toParse = storage.getItem(key)
@@ -40,13 +40,11 @@ function recoilPersist(paths = [], config = {}) {
     try {
       state = JSON.parse(toParse)
     } catch (e) {
-      updated = true;
-      return
+      return updatedCallback();
     }
     
     if (state === null) {
-      updated = true;
-      return
+      return updatedCallback();
     }
     
     Object.keys(state).forEach((key) => {
@@ -57,10 +55,10 @@ function recoilPersist(paths = [], config = {}) {
       }
     })
     
-    updated = true;
+    return updatedCallback();
   }
 
-  return { RecoilPersist, updateState, isUpdated: () => updated }
+  return { RecoilPersist, updateState, onUpdate: (cb) => { updatedCallback = cb; } }
 }
 
 module.exports = recoilPersist
